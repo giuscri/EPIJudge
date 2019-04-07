@@ -5,8 +5,23 @@ from test_framework.test_utils import enable_executor_hook
 
 
 def replace_and_remove(size, s):
-    # TODO - you fill in here.
-    return 0
+    i = 0
+    while i < size:
+        if s[i] == "a":
+            for j in range(size - 1, i, -1):
+                s[j + 1] = s[j]
+            s[i] = "d"
+            s[i + 1] = "d"
+            size += 1
+            i += 2
+        elif s[i] == "b":
+            for j in range(i + 1, size):
+                s[j - 1] = s[j]
+            size -= 1
+        else:
+            i += 1
+
+    return size
 
 
 @enable_executor_hook

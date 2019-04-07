@@ -1,22 +1,22 @@
 from test_framework import generic_test
 
+from math import log2, floor
 
 def power(x, y):
     if y == 0:
         return 1
     if y == 1:
         return x
-    elif y == -1:
-        return 1 / x
 
     abs_y = abs(y)
 
-    p = power(x, abs_y >> 1)
-    r = None
-    if abs_y & 1 == 1:
-        r = p * p * x
-    else:
-        r = p * p
+    r = 1
+    n_bits_in_y = floor(log2(abs_y)) + 1
+    for shamt in range(n_bits_in_y - 1, -1, -1):
+        if (abs_y >> shamt) & 1 == 1:
+            r = r * r * x
+        else:
+            r = r * r
 
     if y < 0:
         return 1 / r

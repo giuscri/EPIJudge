@@ -1,6 +1,8 @@
 from test_framework import generic_test, test_utils
 
 KEYPAD = {
+    "0": "0",
+    "1": "1",
     "2": "ABC",
     "3": "DEF",
     "4": "GHI",
@@ -11,16 +13,22 @@ KEYPAD = {
     "9": "WXYZ",
 }
 
-def phone_mnemonic(phone_number):
-    if not phone_number:
-        return [""]
+def helper_function(phone_number, idx, partial_mnemonic, mnemonics):
+    if idx == len(phone_number):
+        mnemonics.append("".join(partial_mnemonic))
+        return
 
-    r = []
-    suffixes = phone_mnemonic(phone_number[1:])
-    for letter in KEYPAD.get(phone_number[0], phone_number[0]):
-        for suffix in suffixes:
-            r.append(letter + suffix)
-    return r
+    for letter in KEYPAD[phone_number[idx]]:
+        partial_mnemonic[idx] = letter
+        helper_function(phone_number, idx + 1, partial_mnemonic, mnemonics)
+
+def phone_mnemonic(phone_number):
+    mnemonics = []
+    partial_mnemonic = ["" for _ in phone_number]
+
+    helper_function(phone_number, 0, partial_mnemonic, mnemonics)
+
+    return mnemonics
 
 
 if __name__ == '__main__':

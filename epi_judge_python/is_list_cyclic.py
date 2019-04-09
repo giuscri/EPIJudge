@@ -6,9 +6,36 @@ from test_framework.test_utils import enable_executor_hook
 
 
 def has_cycle(head):
-    # TODO - you fill in here.
-    return None
+    slow_iterator = head
+    fast_iterator = head
+    element_of_cycle = None
+    while fast_iterator:
+        if slow_iterator.next and fast_iterator.next and fast_iterator.next.next:
+            slow_iterator = slow_iterator.next
+            fast_iterator = fast_iterator.next.next
+        else:
+            return None
 
+        if slow_iterator is fast_iterator:
+            element_of_cycle = slow_iterator
+            break
+
+    cycle_len = 1
+    iterator = element_of_cycle.next
+    while iterator is not element_of_cycle:
+        cycle_len += 1
+        iterator = iterator.next
+
+    iterator1 = head
+    iterator2 = iterator1
+    for _ in range(cycle_len):
+        iterator2 = iterator2.next
+
+    while iterator1 is not iterator2:
+        iterator1 = iterator1.next
+        iterator2 = iterator2.next
+
+    return iterator1
 
 @enable_executor_hook
 def has_cycle_wrapper(executor, head, cycle_idx):

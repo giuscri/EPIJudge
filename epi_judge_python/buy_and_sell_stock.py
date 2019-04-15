@@ -1,9 +1,14 @@
 from test_framework import generic_test
+from math import inf
 
 
 def buy_and_sell_stock_once(prices):
-    # TODO - you fill in here.
-    return 0.0
+    max_profit = -inf
+    current_min_price = inf
+    for price in prices:
+        current_min_price = min(current_min_price, price)
+        max_profit = max(price - current_min_price, max_profit)
+    return max_profit
 
 
 if __name__ == '__main__':

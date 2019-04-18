@@ -7,8 +7,19 @@ from test_framework.test_utils import enable_executor_hook
 
 
 def lca(node0, node1):
-    # TODO - you fill in here.
-    return None
+    node0_ancestors = set()
+    ancestor = node0
+    while ancestor:
+        node0_ancestors.add(ancestor)
+        ancestor = ancestor.parent
+
+    ancestor = node1
+    while ancestor:
+        if ancestor in node0_ancestors:
+            return ancestor
+        ancestor = ancestor.parent
+
+    raise ValueError(f"{node0} and {node1} do not belong to the same tree.")
 
 
 @enable_executor_hook

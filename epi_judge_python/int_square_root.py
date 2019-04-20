@@ -2,17 +2,19 @@ from test_framework import generic_test
 from math import sqrt, floor
 
 def square_root(k):
-    if k == 0:
-        return 0
+    start, stop = 0, k
+    candidate = start + (stop - start) // 2
+    while start <= stop:
+        if candidate ** 2 > k:
+            start, stop = start, candidate - 1
+        elif candidate ** 2 <= k and (candidate + 1) ** 2 > k:
+            return candidate
+        elif candidate ** 2 < k:
+            start, stop = candidate + 1, stop
 
-    previous = 0
-    current = 1
-    while current ** 2 <= k:
-        previous = current
-        current += 1
+        candidate = start + (stop - start) // 2
 
-    return previous
-
+    raise ValueError("you shouldn't be here")
 
 if __name__ == '__main__':
     exit(

@@ -8,24 +8,60 @@ def partition(A, pivot):
     Returns the array partitioned in place and the index of the first
     position of the partition containing elements greater than the pivot.
 
-    The pivot is guaranteed to exit."""
-    # i, j = 0, len(A) - 1
-    # while i < j:
-    #     while i < len(A) and A[i] < pivot:
-    #         i += 1
-    #     while j >= 0 and A[j] >= pivot:
-    #         j -= 1
+    The pivot is guaranteed to exist."""
+    if len(A) <= 1:
+        return A, len(A)
 
-    #     if i >= j:
-    #         break
-    #     else:
-    #         A[i], A[j] = A[j], A[i]
-    #         i += 1
-    #         j -= 1
+    i, j = 0, len(A) - 1
+    while i < j:
+        while i < len(A) and A[i] <= pivot:
+            i += 1
+        while j >= 0 and A[j] > pivot:
+            j -= 1
 
-    # return A, j + 1
+        if i >= j:
+            break
+        elif i not in range(len(A)):
+            break
+        elif j not in range(len(A)):
+            break
+        else:
+            A[i], A[j] = A[j], A[i]
+
+    r = j + 1
+
+    i, j = 0, r - 1 # if r was correct, j must be exactly the index before it!
+    while i < j:
+        while i < len(A) and A[i] < pivot:
+            i += 1
+        while j >= 0 and A[j] == pivot:
+            j -= 1
+
+        if i >= j:
+            break
+        elif i not in range(len(A)):
+            break
+        elif j not in range(len(A)):
+            break
+        else:
+            A[i], A[j] = A[j], A[i]
+
+    return A, r
+
+def _partition(A, pivot):
     A = [x for x in A if x < pivot] + [x for x in A if x == pivot] + [x for x in A if x > pivot]
-    return A, len([x for x in A if x < pivot]) + len([x for x in A if x == pivot])
+    r = len([x for x in A if x < pivot]) + len([x for x in A if x == pivot])
+    return A, r
+
+def _compare_partition_functions():
+    for _ in range(1000):
+        A = [randint(0, 10) for _ in range(10)]
+        prepartitioned_A = A[:]
+        copyof_A = A[:]
+        pivot = A[randint(0, 9)]
+        A, expected = _partition(A, pivot)
+        copyof_A, actual = partition(copyof_A, pivot)
+        assert expected == actual, prepartitioned_A
 
 # The numbering starts from one, i.e., if A = [3, 1, -1, 2]
 # find_kth_largest(1, A) returns 3, find_kth_largest(2, A) returns 2,

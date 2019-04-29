@@ -25,10 +25,102 @@ class Star:
     def __eq__(self, rhs):
         return math.isclose(self.distance, rhs.distance)
 
+def minimum(min_heap):
+    """Returns minimum value stored in min_heap."""
+
+    if min_heap is None or min_heap == []:
+        return None
+
+    return min_heap[0]
+
+def insert(min_heap, star, k):
+    """Inserts star into provided min_heap, truncate heap after the first k nodes."""
+
+    if min_heap is None:
+        min_heap = []
+
+    min_heap.append(star)
+    child_idx = len(min_heap) - 1
+
+    while child_idx >= 0:
+        parent_idx = (child_idx - 1) // 2
+
+        if parent_idx >= 0 and min_heap[child_idx] < min_heap[parent_idx]:
+            min_heap[child_idx], min_heap[parent_idx] = min_heap[parent_idx], min_heap[child_idx]
+        else:
+            break # we don't need to check this further
+
+        child_idx = parent_idx
+
+    maximum_idx = 0
+    for i, star in enumerate(min_heap):
+        if star > min_heap[maximum_idx]:
+            maximum_idx = i
+
+    min_heap[maximum_idx], min_heap[-1] = min_heap[-1], min_heap[maximum_idx]
+
+    parent_idx = maximum_idx
+    while parent_idx < len(min_heap):
+        left_child_idx = 2 * parent_idx + 1
+        right_child_idx = 2 * parent_idx + 2
+
+        if left_child_idx >= len(min_heap):
+            break # min_heap[parent_idx] is a leaf
+        elif right_child_idx >= len(min_heap):
+            child_idx = left_child_idx
+        elif min_heap[left_child_idx] < min_heap[right_child_idx]:
+            child_idx = left_child_idx
+        else:
+            child_idx = right_child_idx
+
+        if min_heap[parent_idx] > min_heap[child_idx]:
+            min_heap[parent_idx], min_heap[child_idx] = min_heap[child_idx], min_heap[parent_idx]
+        else:
+            break # we don't need to check this further
+
+    return min_heap[:k]
+
+def extract_minimum(min_heap):
+    """Pops out mininum from min_heap, returns min_heap with min_heap properties restored."""
+
+    if min_heap is None or min_heap == []:
+        return None, min_heap
+
+    min_heap[0], min_heap[-1] = min_heap[-1], min_heap[0]
+    previous_minimum = min_heap[-1]
+    min_heap = min_heap[:-1] # slicing off the root just moved to the end of the array
+    parent_idx = 0
+    while parent_idx < len(min_heap):
+        left_child_idx = 2 * parent_idx + 1
+        right_child_idx = 2 * parent_idx + 2
+
+        if left_child_idx >= len(min_heap):
+            break
+
+        if right_child_idx < len(min_heap) and min_heap[right_child_idx] < min_heap[left_child_idx]:
+            child_idx = right_child_idx
+        else:
+            child_idx = left_child_idx
+
+        if min_heap[child_idx] < min_heap[parent_idx]:
+            min_heap[child_idx], min_heap[parent_idx] = min_heap[parent_idx], min_heap[child_idx]
+            parent_idx = child_idx
+        else:
+            break # we don't need to check this further
+
+    return previous_minimum, min_heap
 
 def find_closest_k_stars(stars, k):
-    # TODO - you fill in here.
-    return []
+    min_heap = None
+    for star in stars:
+        min_heap = insert(min_heap, star, k)
+
+    r = []
+    for _ in range(k):
+        m, min_heap = extract_minimum(min_heap)
+        r.append(m)
+
+    return r
 
 
 def comp(expected_output, output):

@@ -25,101 +25,82 @@ class Star:
     def __eq__(self, rhs):
         return math.isclose(self.distance, rhs.distance)
 
-def minimum(min_heap):
-    """Returns minimum value stored in min_heap."""
+def maximum(max_heap):
+    """Returns maximum value stored in max_heap."""
 
-    if min_heap is None or min_heap == []:
+    if max_heap is None or max_heap == []:
         return None
 
-    return min_heap[0]
+    return max_heap[0]
 
-def insert(min_heap, star, k):
-    """Inserts star into provided min_heap, truncate heap after the first k nodes."""
+def insert(max_heap, star):
+    """Inserts star into provided max_heap."""
 
-    if min_heap is None:
-        min_heap = []
+    if max_heap is None:
+        max_heap = []
 
-    min_heap.append(star)
-    child_idx = len(min_heap) - 1
+    max_heap.append(star)
+    child_idx = len(max_heap) - 1
 
     while child_idx >= 0:
         parent_idx = (child_idx - 1) // 2
 
-        if parent_idx >= 0 and min_heap[child_idx] < min_heap[parent_idx]:
-            min_heap[child_idx], min_heap[parent_idx] = min_heap[parent_idx], min_heap[child_idx]
+        if parent_idx >= 0 and max_heap[child_idx] > max_heap[parent_idx]:
+            max_heap[child_idx], max_heap[parent_idx] = max_heap[parent_idx], max_heap[child_idx]
         else:
             break # we don't need to check this further
 
         child_idx = parent_idx
 
-    maximum_idx = 0
-    for i, star in enumerate(min_heap):
-        if star > min_heap[maximum_idx]:
-            maximum_idx = i
+    return max_heap
 
-    min_heap[maximum_idx], min_heap[-1] = min_heap[-1], min_heap[maximum_idx]
+def extract_maximum(max_heap):
+    """Pops out maxinum from max_heap, returns max_heap with max_heap properties restored."""
 
-    parent_idx = maximum_idx
-    while parent_idx < len(min_heap):
-        left_child_idx = 2 * parent_idx + 1
-        right_child_idx = 2 * parent_idx + 2
+    if max_heap is None or max_heap == []:
+        return None, max_heap
 
-        if left_child_idx >= len(min_heap):
-            break # min_heap[parent_idx] is a leaf
-        elif right_child_idx >= len(min_heap):
-            child_idx = left_child_idx
-        elif min_heap[left_child_idx] < min_heap[right_child_idx]:
-            child_idx = left_child_idx
-        else:
-            child_idx = right_child_idx
-
-        if min_heap[parent_idx] > min_heap[child_idx]:
-            min_heap[parent_idx], min_heap[child_idx] = min_heap[child_idx], min_heap[parent_idx]
-        else:
-            break # we don't need to check this further
-
-    return min_heap[:k]
-
-def extract_minimum(min_heap):
-    """Pops out mininum from min_heap, returns min_heap with min_heap properties restored."""
-
-    if min_heap is None or min_heap == []:
-        return None, min_heap
-
-    min_heap[0], min_heap[-1] = min_heap[-1], min_heap[0]
-    previous_minimum = min_heap[-1]
-    min_heap = min_heap[:-1] # slicing off the root just moved to the end of the array
+    max_heap[0], max_heap[-1] = max_heap[-1], max_heap[0]
+    previous_maximum = max_heap[-1]
+    max_heap = max_heap[:-1] # slicing off the root just moved to the end of the array
     parent_idx = 0
-    while parent_idx < len(min_heap):
+    while parent_idx < len(max_heap):
         left_child_idx = 2 * parent_idx + 1
         right_child_idx = 2 * parent_idx + 2
 
-        if left_child_idx >= len(min_heap):
-            break
+        if left_child_idx >= len(max_heap):
+            break # parent was a leaf
 
-        if right_child_idx < len(min_heap) and min_heap[right_child_idx] < min_heap[left_child_idx]:
+        if right_child_idx < len(max_heap) and max_heap[right_child_idx] > max_heap[left_child_idx]:
             child_idx = right_child_idx
         else:
             child_idx = left_child_idx
 
-        if min_heap[child_idx] < min_heap[parent_idx]:
-            min_heap[child_idx], min_heap[parent_idx] = min_heap[parent_idx], min_heap[child_idx]
+        if max_heap[child_idx] > max_heap[parent_idx]:
+            max_heap[child_idx], max_heap[parent_idx] = max_heap[parent_idx], max_heap[child_idx]
             parent_idx = child_idx
         else:
             break # we don't need to check this further
 
-    return previous_minimum, min_heap
+    return previous_maximum, max_heap
 
 def find_closest_k_stars(stars, k):
-    min_heap = None
+    max_heap = []
     for star in stars:
-        min_heap = insert(min_heap, star, k)
+        if len(max_heap) < k:
+            max_heap = insert(max_heap, star)
+            continue
+
+        if star < maximum(max_heap):
+            _, max_heap = extract_maximum(max_heap)
+            max_heap = insert(max_heap, star)
 
     r = []
     for _ in range(k):
-        m, min_heap = extract_minimum(min_heap)
+        m, max_heap = extract_maximum(max_heap)
         r.append(m)
 
+    r.reverse()
     return r
 
 

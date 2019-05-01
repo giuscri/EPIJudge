@@ -2,8 +2,10 @@ from test_framework import generic_test
 
 
 def merge_two_sorted_arrays(A, m, B, n):
-    # TODO - you fill in here.
-    return
+    for i in range(len(B)):
+        A[m + i] = B[i]
+    A.sort()
+    return A
 
 
 def merge_two_sorted_arrays_wrapper(A, m, B, n):

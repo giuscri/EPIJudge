@@ -1,30 +1,22 @@
 from test_framework import generic_test
 
-def _find_first_greater_than_k(tree, k):
+def _find_first_greater_than_k(tree, k, smallest_larger_than_k_node):
     if tree is None:
-        return []
+        return smallest_larger_than_k_node
 
-    sorted_keys = []
-    sorted_keys.extend(_find_first_greater_than_k(tree.left, k))
-    sorted_keys.append(tree.data)
-    sorted_keys.extend(_find_first_greater_than_k(tree.right, k))
+    if k < tree.data:
+        if smallest_larger_than_k_node is None or smallest_larger_than_k_node.data > tree.data:
+            smallest_larger_than_k_node = tree
 
-    return sorted_keys
+        return _find_first_greater_than_k(tree.left, k, smallest_larger_than_k_node)
+    elif k > tree.data:
+        return _find_first_greater_than_k(tree.right, k, smallest_larger_than_k_node)
+    elif k == tree.data:
+        return _find_first_greater_than_k(tree.right, k, smallest_larger_than_k_node)
 
 def find_first_greater_than_k(tree, k):
-    class R:
-        def __init__(self, data):
-            self.data = data
+    return _find_first_greater_than_k(tree, k, None)
 
-    sorted_keys = _find_first_greater_than_k(tree, k)
-    previous = None
-    for key in sorted_keys:
-        if (previous is None or previous <= k) and key > k:
-            return R(key)
-
-        previous = key
-
-    return None
 
 def find_first_greater_than_k_wrapper(tree, k):
     result = find_first_greater_than_k(tree, k)

@@ -6,10 +6,20 @@ from test_framework.test_utils import enable_executor_hook
 
 NUM_PEGS = 3
 
+def _compute_tower_hanoi(num_rings, from_peg, to_peg):
+    if num_rings == 1:
+        return [(from_peg, to_peg)]
+
+    intermediate_peg = {0, 1, 2}.difference({from_peg, to_peg}).pop()
+
+    moves = _compute_tower_hanoi(num_rings - 1, from_peg, intermediate_peg)
+    moves.append((from_peg, to_peg))
+    moves.extend(_compute_tower_hanoi(num_rings - 1, intermediate_peg, to_peg))
+
+    return moves
 
 def compute_tower_hanoi(num_rings):
-    # TODO - you fill in here.
-    return []
+    return _compute_tower_hanoi(num_rings, 0, 1)
 
 
 @enable_executor_hook

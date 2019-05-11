@@ -10,11 +10,68 @@ WHITE, BLACK = range(2)
 
 Coordinate = collections.namedtuple('Coordinate', ('x', 'y'))
 
+def create_coordinate_if_defined_and_not_wall(i, j, r, c, maze):
+    if i not in range(r):
+        return None
+    if j not in range(c):
+        return None
+    if maze[i][j] == 1:
+        return None
+
+    return Coordinate(i, j)
+
+def maze_as_graph(maze):
+    G = dict()
+    r, c = len(maze), len(maze[0])
+
+    for i in range(len(maze)):
+        for j in range(len(maze[0])):
+            vertex = create_coordinate_if_defined_and_not_wall(i, j, r, c, maze)
+            if vertex is None:
+                continue
+
+            adjacent = create_coordinate_if_defined_and_not_wall(i-1, j, r, c, maze)
+            if adjacent is not None:
+                G[vertex] = G.get(vertex, []) + [adjacent]
+
+            adjacent = create_coordinate_if_defined_and_not_wall(i, j-1, r, c, maze)
+            if adjacent is not None:
+                G[vertex] = G.get(vertex, []) + [adjacent]
+
+            adjacent = create_coordinate_if_defined_and_not_wall(i, j+1, r, c, maze)
+            if adjacent is not None:
+                G[vertex] = G.get(vertex, []) + [adjacent]
+
+            adjacent = create_coordinate_if_defined_and_not_wall(i+1, j, r, c, maze)
+            if adjacent is not None:
+                G[vertex] = G.get(vertex, []) + [adjacent]
+
+    return G
+
+def _search_maze(G, s, e, visited):
+    visited.add(s)
+
+    if s == e:
+        return [e]
+
+    for adjacent in G[s]:
+        if adjacent in visited:
+            continue
+
+        path = _search_maze(G, adjacent, e, visited)
+        if path is not None:
+            return [s] + path
+
+    return None
 
 def search_maze(maze, s, e):
-    # TODO - you fill in here.
-    return []
+    G = maze_as_graph(maze)
+    if s not in G:
+        return None
+    if e not in G:
+        return None
 
+    return _search_maze(G, s, e, set())
 
 def path_element_is_feasible(maze, prev, cur):
     if not ((0 <= cur.x < len(maze)) and

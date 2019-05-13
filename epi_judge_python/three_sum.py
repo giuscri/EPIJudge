@@ -1,9 +1,17 @@
 from test_framework import generic_test
 
+def _has_three_sum(A, t, k):
+    if k == 0:
+        return t == 0
+
+    for element in A:
+        if _has_three_sum(A, t - element, k - 1):
+            return True
+
+    return False
 
 def has_three_sum(A, t):
-    # TODO - you fill in here.
-    return True
+    return _has_three_sum(A, t, 3)
 
 
 if __name__ == '__main__':

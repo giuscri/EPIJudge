@@ -1,24 +1,26 @@
 from test_framework import generic_test
 
-def _has_three_sum(A, t, k, cache):
-    if k == 0:
-        return t == 0
+def has_two_sum(A, t):
+    i, j = 0, len(A) - 1
 
-    if (k, t) in cache:
-        return cache[(k, t)]
-
-    for element in A:
-        has = _has_three_sum(A, t - element, k - 1, cache)
-        cache[(k, t)] = has
-        if has:
-            return has
-
-    cache[(k, t)] = False
-    return cache[(k, t)]
+    while i <= j:
+        if A[i] + A[j] == t:
+            return True
+        elif A[i] + A[j] < t:
+            i += 1
+        elif A[j] + A[i] > t:
+            j -= 1
+        else:
+            raise Error("You should not be here")
 
 def has_three_sum(A, t):
-    return _has_three_sum(A, t, 3, dict())
+    A.sort()
 
+    for a in A:
+        if has_two_sum(A, t - a):
+            return True
+
+    return False
 
 if __name__ == '__main__':
     exit(

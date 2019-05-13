@@ -1,17 +1,23 @@
 from test_framework import generic_test
 
-def _has_three_sum(A, t, k):
+def _has_three_sum(A, t, k, cache):
     if k == 0:
         return t == 0
 
-    for element in A:
-        if _has_three_sum(A, t - element, k - 1):
-            return True
+    if (k, t) in cache:
+        return cache[(k, t)]
 
-    return False
+    for element in A:
+        has = _has_three_sum(A, t - element, k - 1, cache)
+        cache[(k, t)] = has
+        if has:
+            return has
+
+    cache[(k, t)] = False
+    return cache[(k, t)]
 
 def has_three_sum(A, t):
-    return _has_three_sum(A, t, 3)
+    return _has_three_sum(A, t, 3, dict())
 
 
 if __name__ == '__main__':

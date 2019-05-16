@@ -1,44 +1,75 @@
-from threading import Thread, RLock, get_ident, Condition
+from threading import Thread, Condition, Lock
 from time import sleep
 from random import randint
 
-import sys
-
-ODD, EVEN = 0, 1
-CURRENT_TURN = EVEN
+TURN = 0 # 0 for even, 1 for odd
 CONDITION = Condition()
-N = 100
+N = 10
 
-def print_odd_numbers():
-    for i in range(1, N + 1, 2):
-        wait_turn(ODD)
-        print(i)
-        toggle_turn()
+TOGGLE_TURN = Lock()
+def toggle_turn():
+  with TOGGLE_TURN:
+    global TURN
+    TURN = (TURN+1) % 2
+
+CHECK_TURN_LOCK = Lock()
+def check_turn(turn):
+  CHECK_TURN_LOCK.acquire()
+  while TURN != turn:
+    with CONDITION:
+      # Just before `wait()`ing, release CHECK_TURN_LOCK as Object.wait()
+      # releases the Object monitor in Java
+      CHECK_TURN_LOCK.release()
+      CONDITION.wait()
+
+  if CHECK_TURN_LOCK.locked():
+    CHECK_TURN_LOCK.release()
 
 def print_even_numbers():
-    for i in range(0, N + 1, 2):
-        wait_turn(EVEN)
-        print(i)
-        toggle_turn()
+  for counter in range(0, N+1, 2):
+    # Introduce some evil
+    sleep(randint(0, 4))
 
-def wait_turn(turn):
-    if turn != CURRENT_TURN:
-        CONDITION.acquire()
-        CONDITION.wait() # wait() releases the lock and reacquire it when it wakes up
-        CONDITION.release()
+    # check_turn() does acquire a Lock, enters a while-loop and doesn't exit
+    # until TURN it's 0 -- it doesn't do busy waiting though. Then the Lock is
+    # released.
+    check_turn(0)
 
-def toggle_turn():
-    global CURRENT_TURN
-    CURRENT_TURN = (CURRENT_TURN + 1) % 2
+    print(counter)
 
-    CONDITION.acquire()
-    CONDITION.notify()
-    CONDITION.release()
+    # toggle_turn() does acquire a Lock, changes the value of TURN, then
+    # releases the Lock.
+    toggle_turn()
 
-t1, t2 = Thread(target=print_even_numbers), Thread(target=print_odd_numbers)
+    with CONDITION:
+      CONDITION.notify()
 
-for thread in [t1, t2]:
-    thread.start()
+def print_odd_numbers():
+  for counter in range(1, N+1, 2):
+    # Introduce some evil
+    sleep(randint(0, 4))
 
-for thread in [t1, t2]:
-    thread.join()
+    # check_turn() does acquire a Lock, enters a while-loop and doesn't exit
+    # until TURN it's 1 -- it doesn't do busy waiting though. Then the Lock is
+    # released.
+    check_turn(1)
+
+    print(counter)
+
+    # toggle_turn() does acquire a Lock, changes the value of TURN, then
+    # releases the Lock.
+    toggle_turn()
+
+    with CONDITION:
+      CONDITION.notify()
+
+even_numbers_thread = Thread(target=print_even_numbers)
+odd_numbers_thread = Thread(target=print_odd_numbers)
+
+odd_numbers_thread.start()
+even_numbers_thread.start()
+
+for thread in (even_numbers_thread, odd_numbers_thread):
+  thread.join()
+
+print("completed!")

@@ -1,14 +1,38 @@
 def partition(A, pivot):
-  """Returns the index of pivot in A."""
+  mid_start, mid_end = -1, -1
 
-  smaller_than_pivot = [x for x in A if x < pivot]
-  equal_to_pivot = [x for x in A if x == pivot]
-  larger_than_pivot = [x for x in A if x > pivot]
-  A[:] = smaller_than_pivot + equal_to_pivot + larger_than_pivot
-  return A, len(smaller_than_pivot), len(smaller_than_pivot) + len(equal_to_pivot)
+  i, j = 0, len(A)-1
+  while True:
+    while i < len(A) and A[i] < pivot:
+      i += 1
+
+    while j >= 0 and A[j] >= pivot:
+      j -= 1
+
+    if i >= j:
+      break
+
+    A[i], A[j] = A[j], A[i]
+
+  mid_start = i
+  i, j = mid_start, len(A)-1
+  while True:
+    while i < len(A) and A[i] == pivot:
+      i += 1
+
+    while j >= 0 and A[j] > pivot:
+      j -= 1
+
+    if i >= j:
+      break
+
+    A[i], A[j] = A[j], A[i]
+
+  mid_end = i
+  return A, mid_start, mid_end
 
 assert partition([1, 2, 3, 4], 2) == ([1, 2, 3, 4], 1, 2)
-assert partition([1, 4, -1, 8, 3, 9, -7], 8) == ([1, 4, -1, 3, -7, 8, 9], 5, 6)
+assert partition([1, 4, -1, 8, 3, 9, -7], 8) == ([1, 4, -1, -7, 3, 8, 9], 5, 6)
 
 def _quicksort(A, start, stop):
   assert start >= 0 and stop >= 0
@@ -24,7 +48,6 @@ def _quicksort(A, start, stop):
   return A
 
 def quicksort(A):
-  #assert len(set(A)) == len(A) # implementation assumes you have no duplicates
   return _quicksort(A, 0, len(A))
 
 A = [1, 3, 2, 9, 4]
